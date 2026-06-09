@@ -530,21 +530,20 @@ from sklearn.compose import ColumnTransformer
 
 df = pd.read_csv("segurosdatabase.csv")
 
-X = df.drop(columns=['charges']) # Atributos
-y = df['charges']                # Variável-alvo (Target)
+X = df.drop(columns=['charges']) 
+y = df['charges']                
 
-# 3. Divisão Treino/Teste (80% para treino e 20% para teste)
-# O random_state garante que o resultado seja sempre o mesmo (Reprodutibilidade)
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 4. Configurar as transformações das colunas
+
 colunas_numericas = ['age', 'bmi', 'children']
 colunas_categoricas = ['sex', 'smoker', 'region']
 
 preprocessor = ColumnTransformer(
     transformers=[
-        ('num', StandardScaler(), colunas_numericas),          # Normalização
-        ('cat', OneHotEncoder(drop='first'), colunas_categoricas) # Transformar texto em número
+        ('num', StandardScaler(), colunas_numericas),          
+        ('cat', OneHotEncoder(drop='first'), colunas_categoricas) 
     ]
 )
 
@@ -562,28 +561,28 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# Definir os 3 modelos
+
 modelos = {
     'Linear Regression (Baseline)': LinearRegression(),
     'Random Forest': RandomForestRegressor(random_state=42),
     'Gradient Boosting (Ponto Extra!)': GradientBoostingRegressor(random_state=42)
 }
 
-# Treinar e avaliar cada um deles de forma consistente
+
 resultados = []
 
 for nome, modelo in modelos.items():
-    # O Pipeline garante que o pré-processamento seja aplicado corretamente sem vazamento de dados
+   
     pipeline_modelo = Pipeline(steps=[('preprocessor', preprocessor),
                                       ('regressor', modelo)])
 
-    # Treinamento
+    
     pipeline_modelo.fit(X_train, y_train)
 
-    # Predição
+   
     y_pred = pipeline_modelo.predict(X_test)
 
-    # Cálculo das métricas exigidas
+   
     mae = mean_absolute_error(y_test, y_pred)
     rmse = np.sqrt(mean_squared_error(y_test, y_pred))
     r2 = r2_score(y_test, y_pred)
@@ -595,7 +594,7 @@ for nome, modelo in modelos.items():
         'R² Score (Precisão)': r2
     })
 
-# Exibir a tabela comparativa estruturada
+
 df_resultados = pd.DataFrame(resultados)
 print(df_resultados.to_string(index=False))
 
@@ -627,17 +626,17 @@ Para avaliar a capacidade de generalização e otimizar nosso modelo, aplicamos 
 
 from sklearn.model_selection import GridSearchCV
 
-# Criar o pipeline para o Random Forest
+
 pipeline_rf = Pipeline(steps=[('preprocessor', preprocessor),
                               ('rf', RandomForestRegressor(random_state=42))])
 
-# Definir quais parâmetros testar
+
 param_grid = {
     'rf__n_estimators': [50, 100, 150],
     'rf__max_depth': [None, 5, 10]
 }
 
-# Executar a busca com Validação Cruzada de 5 dobras (cv=5)
+
 grid_search = GridSearchCV(pipeline_rf, param_grid, cv=5, scoring='r2', n_jobs=-1)
 grid_search.fit(X_train, y_train)
 
